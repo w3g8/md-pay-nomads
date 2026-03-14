@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:intl/intl.dart';
 import '../services/emvco_parser.dart';
 import '../services/wallet_service.dart';
 
