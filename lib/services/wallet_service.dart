@@ -74,4 +74,24 @@ class WalletService {
   Future<List<dynamic>> getQRPayments() async {
     return await ApiClient.get('/v1/qr-payments');
   }
+
+  Future<List<dynamic>> getPassportServices() async {
+    return await ApiClient.get('/v1/passport-services') as List<dynamic>;
+  }
+
+  Future<Map<String, dynamic>> submitPassportRenewal(Map<String, dynamic> data) async {
+    return await ApiClient.post('/v1/passport-renewal', data);
+  }
+
+  Future<List<dynamic>> getVisaPrograms(String nationality) async {
+    return await ApiClient.get('/v1/visa-programs?nationality=$nationality') as List<dynamic>;
+  }
+
+  Future<Map<String, dynamic>> submitVisaApplication(Map<String, dynamic> data) async {
+    return await ApiClient.post('/v1/visa-application', data);
+  }
+
+  Future<Map<String, dynamic>> getServiceStatus(String id) async {
+    return await ApiClient.get('/v1/service-status/$id');
+  }
 }

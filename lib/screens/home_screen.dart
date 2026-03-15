@@ -6,6 +6,9 @@ import 'scan_screen.dart';
 import 'accounts_screen.dart';
 import 'merchant_qr_screen.dart';
 import 'login_screen.dart';
+import 'topup_screen.dart';
+import 'passport_screen.dart';
+import 'visa_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -42,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
       const AccountsScreen(),
       const ScanScreen(),
       const MerchantQRScreen(),
+      const TopUpScreen(),
     ];
 
     return Scaffold(
@@ -54,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
           NavigationDestination(icon: Icon(Icons.account_balance_wallet_outlined), selectedIcon: Icon(Icons.account_balance_wallet), label: 'Accounts'),
           NavigationDestination(icon: Icon(Icons.qr_code_scanner), selectedIcon: Icon(Icons.qr_code_scanner), label: 'Scan & Pay'),
           NavigationDestination(icon: Icon(Icons.store_outlined), selectedIcon: Icon(Icons.store), label: 'My QR'),
+          NavigationDestination(icon: Icon(Icons.add_card), selectedIcon: Icon(Icons.add_card), label: 'Top Up'),
         ],
       ),
     );

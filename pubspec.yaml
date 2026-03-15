@@ -1,7 +1,7 @@
 name: nomads_wallet
 description: Nomads.one Digital Wallet — QR Pay, Send, Exchange
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: ^3.6.0
@@ -18,6 +18,7 @@ dependencies:
   flutter_secure_storage: ^9.2.0
   url_launcher: ^6.3.0
   google_fonts: ^6.2.0
+  flutterwave_standard: ^1.0.8
 
 dev_dependencies:
   flutter_test:
