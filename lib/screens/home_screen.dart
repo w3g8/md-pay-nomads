@@ -7,6 +7,8 @@ import 'accounts_screen.dart';
 import 'merchant_qr_screen.dart';
 import 'login_screen.dart';
 import 'topup_screen.dart';
+import 'passport_screen.dart';
+import 'visa_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
