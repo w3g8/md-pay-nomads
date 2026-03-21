@@ -7,10 +7,9 @@ import 'accounts_screen.dart';
 import 'bills_screen.dart';
 import 'merchant_qr_screen.dart';
 import 'topup_screen.dart';
-import 'passport_screen.dart';
-import 'visa_screen.dart';
 import 'bill_qr_generator_screen.dart';
 import 'cards_screen.dart';
+import 'travel_screen.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -151,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _quickAction(Icons.credit_card, 'Cards', () => _pushScreen(const CardsScreen())),
                 _quickAction(Icons.qr_code, 'Bill QR', () => _pushScreen(const BillQrGeneratorScreen())),
-                _quickAction(Icons.flight, 'Visa', () => _pushScreen(const VisaScreen())),
+                _quickAction(Icons.luggage, 'Travel', () => _pushScreen(const TravelScreen())),
                 _quickAction(Icons.currency_exchange, 'Exchange', () {}),
               ],
             ),
