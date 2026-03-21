@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import '../services/wallet_service.dart';
+import '../services/emvco_parser.dart';
 
 class BillsScreen extends StatefulWidget {
   const BillsScreen({super.key});
@@ -9,7 +11,7 @@ class BillsScreen extends StatefulWidget {
   State<BillsScreen> createState() => _BillsScreenState();
 }
 
-enum BillStep { categories, form, confirm, done }
+enum BillStep { categories, scanning, form, confirm, done }
 
 class _BillsScreenState extends State<BillsScreen> {
   BillStep _step = BillStep.categories;
@@ -17,6 +19,7 @@ class _BillsScreenState extends State<BillsScreen> {
   String? _selectedCategory;
   final _accountNumCtrl = TextEditingController();
   final _amountCtrl = TextEditingController();
+  QRPhData? _scannedQR;
   int? _selectedAccountId;
   List<dynamic> _accounts = [];
   List<dynamic> _billers = [];
@@ -169,12 +172,83 @@ class _BillsScreenState extends State<BillsScreen> {
       _receipt = null;
       _error = null;
       _billers = [];
+      _scannedQR = null;
     });
     _loadRecentBills();
   }
 
+  void _onBillQRScan(String raw) {
+    final parsed = parseQRPh(raw);
+    if (parsed == null) {
+      setState(() => _error = 'Not a valid QR Ph bill code');
+      return;
+    }
+    setState(() {
+      _scannedQR = parsed;
+      _selectedBiller = {
+        'name': parsed.merchantName,
+        'code': parsed.merchantId,
+        'id': parsed.merchantId,
+      };
+      _accountNumCtrl.text = parsed.referenceLabel ?? parsed.merchantId;
+      if (parsed.amount != null) {
+        _amountCtrl.text = parsed.amount!.toStringAsFixed(2);
+      }
+      _selectedCategory = _guessCategoryFromMCC(parsed.mcc);
+      _step = BillStep.form;
+    });
+  }
+
+  String _guessCategoryFromMCC(String mcc) {
+    switch (mcc) {
+      case '4900': return 'electric';
+      case '4816': return 'internet';
+      case '4814': return 'phone';
+      case '4899': return 'cable';
+      case '4812': return 'phone';
+      case '6300': return 'insurance';
+      case '6012': return 'loans';
+      case '9211': case '9222': case '9311': return 'government';
+      case '8211': case '8220': case '8299': return 'school';
+      default: return 'other';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_step == BillStep.scanning) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          title: const Text('Scan Bill QR', style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.black,
+          iconTheme: const IconThemeData(color: Colors.white),
+          leading: IconButton(icon: const Icon(Icons.close), onPressed: () => setState(() => _step = BillStep.categories)),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: MobileScanner(
+                onDetect: (capture) {
+                  final code = capture.barcodes.firstOrNull?.rawValue;
+                  if (code != null) _onBillQRScan(code);
+                },
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: Colors.black,
+              child: const Text(
+                'Point at a Philippine bill QR code\nAmount and merchant will be auto-filled',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pay Bills'),
@@ -187,6 +261,7 @@ class _BillsScreenState extends State<BillsScreen> {
                   } else if (_step == BillStep.form) {
                     _step = BillStep.categories;
                     _selectedBiller = null;
+                    _scannedQR = null;
                   }
                 });
               })
@@ -200,6 +275,8 @@ class _BillsScreenState extends State<BillsScreen> {
     switch (_step) {
       case BillStep.categories:
         return _buildCategories();
+      case BillStep.scanning:
+        return const SizedBox(); // handled in build()
       case BillStep.form:
         return _buildForm();
       case BillStep.confirm:
@@ -214,6 +291,30 @@ class _BillsScreenState extends State<BillsScreen> {
       padding: const EdgeInsets.all(16),
       children: [
         if (_error != null) _errorBanner(),
+
+        // Scan Bill QR button
+        GestureDetector(
+          onTap: () => setState(() => _step = BillStep.scanning),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: const LinearGradient(colors: [Color(0xFF1a56db), Color(0xFF7c3aed)]),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.qr_code_scanner, color: Colors.white, size: 24),
+                SizedBox(width: 12),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Scan Bill QR Code', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
+                  Text('Auto-fill amount from Philippine bill QR', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                ]),
+              ],
+            ),
+          ),
+        ),
 
         // Category grid
         GridView.count(
@@ -306,6 +407,22 @@ class _BillsScreenState extends State<BillsScreen> {
       padding: const EdgeInsets.all(20),
       children: [
         if (_error != null) _errorBanner(),
+
+        // QR scanned indicator
+        if (_scannedQR != null)
+          Container(
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(12)),
+            child: Row(children: [
+              Icon(Icons.qr_code, color: Colors.green[700], size: 20),
+              const SizedBox(width: 8),
+              Expanded(child: Text(
+                'Scanned from QR code${_scannedQR!.amount != null ? ' \u2014 PHP ${_scannedQR!.amount!.toStringAsFixed(2)}' : ''}',
+                style: TextStyle(color: Colors.green[700], fontSize: 13),
+              )),
+            ]),
+          ),
 
         // Biller header
         _card(child: Row(children: [

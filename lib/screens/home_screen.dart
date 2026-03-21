@@ -6,6 +6,10 @@ import 'scan_screen.dart';
 import 'accounts_screen.dart';
 import 'bills_screen.dart';
 import 'merchant_qr_screen.dart';
+import 'topup_screen.dart';
+import 'passport_screen.dart';
+import 'visa_screen.dart';
+import 'bill_qr_generator_screen.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -60,6 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  void _pushScreen(Widget screen) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
   }
 
   Widget _buildDashboard() {
@@ -124,13 +132,25 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Quick actions
+            // Quick actions — row 1
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _quickAction(Icons.qr_code_scanner, 'Scan & Pay', () => setState(() => _currentIndex = 2)),
                 _quickAction(Icons.receipt_long, 'Bills', () => setState(() => _currentIndex = 3)),
+                _quickAction(Icons.add_card, 'Top Up', () => _pushScreen(const TopUpScreen())),
                 _quickAction(Icons.store, 'My QR', () => setState(() => _currentIndex = 4)),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Nomad services — row 2
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _quickAction(Icons.qr_code, 'Bill QR', () => _pushScreen(const BillQrGeneratorScreen())),
+                _quickAction(Icons.flight, 'Visa', () => _pushScreen(const VisaScreen())),
+                _quickAction(Icons.badge, 'Passport', () => _pushScreen(const PassportScreen())),
                 _quickAction(Icons.currency_exchange, 'Exchange', () {}),
               ],
             ),
