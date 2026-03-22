@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'theme.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/auth_service.dart';
@@ -17,18 +17,7 @@ class NomadsApp extends StatelessWidget {
     return MaterialApp(
       title: 'Nomads Wallet',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1a56db),
-          secondary: const Color(0xFF7c3aed),
-        ),
-        textTheme: GoogleFonts.interTextTheme(),
-        useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          elevation: 0,
-        ),
-      ),
+      theme: nomadsTheme(),
       home: const AuthGate(),
     );
   }
